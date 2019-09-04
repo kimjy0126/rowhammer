@@ -6,7 +6,7 @@
 #include <unistd.h>
 #define PRINT_RES(a, b) printf("Virtual address: %p, Physical address: 0x%lx\n", a, b)
 
-extern char *user_array;
+extern char user_array[];
 
 size_t virt_to_phys(size_t adrs)
 {
@@ -22,7 +22,7 @@ size_t virt_to_phys(size_t adrs)
     close(pagemap);
     return pf * 0x1000 + adrs % 0x1000;
 }
-void find_proper_addresses(void *adrs1, void *adrs2)
+void find_proper_addresses(void **adrs1, void **adrs2)
 {
     size_t phys_user_array = virt_to_phys((size_t)user_array);
 
@@ -30,14 +30,17 @@ void find_proper_addresses(void *adrs1, void *adrs2)
     printf("X\t");
     PRINT_RES(user_array, phys_user_array);
     uint64_t step = 0x1000;
-    uint64_t size = sizeof(user_array) / sizeof(char);
+//    uint64_t size = sizeof(user_array) / sizeof(char);
+    uint64_t size = 1ULL << 30;
     char *end = user_array + size;
     char *ptr;
     for (ptr = user_array; ptr < end; ptr++)
     {
 //        printf("Checking for %p...\n", user_array + step);
         volatile size_t phys_step = virt_to_phys((size_t)(user_array + step));
-        if ((phys_step - phys_user_array) % 0x800000 == 0)
+//        if ((phys_step - phys_user_array) % 0x800000 == 0)
+//        if ((phys_step - phys_user_array) % 0x2000 == 0)
+        if ((phys_step - phys_user_array) == 0x2000)
         {
             printf("Y\t");
             PRINT_RES(user_array + step, phys_step);
@@ -51,6 +54,6 @@ void find_proper_addresses(void *adrs1, void *adrs2)
         exit(1);
     }
 
-    adrs1 = user_array;
-    adrs2 = user_array + step;
+    *adrs1 = user_array;
+    *adrs2 = user_array + step;
 }

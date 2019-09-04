@@ -1,0 +1,5 @@
+timer*
+a.out
+.gdb_history
+*.o
+rowhammer

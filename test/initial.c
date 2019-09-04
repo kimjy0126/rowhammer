@@ -6,12 +6,14 @@
 #include <unistd.h>
 #define PRINT_RES(a, b) printf("Virtual address: %p, Physical address: 0x%lx\n", a, b)
 
-char user_array[0x100000000];
+char user_array[1ULL << 30];
 
 size_t virt_to_phys(size_t adrs);
 static inline void rowhammer(void *adrs1, void *adrs2);
 int main()
 {
+//    char *user_array;
+//    user_array = (char *)malloc(1ULL << 30);
     memset(user_array, 0x00, sizeof(user_array));
     size_t phys_user_array = virt_to_phys((size_t)user_array);
 
@@ -36,6 +38,8 @@ int main()
         if (i % 0x100000 == 0) printf("%lx\n", i);
         if (user_array[i]) printf("user_array[%ld]: 0x00 -> 0x%x\n", i, user_array[i]);
     }*/
+    free(user_array);
+    return 0;
 }
 size_t virt_to_phys(size_t adrs)
 {
